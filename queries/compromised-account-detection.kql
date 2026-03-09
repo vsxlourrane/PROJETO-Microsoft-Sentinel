@@ -1,0 +1,36 @@
+// ============================================
+// SOC Project 01 — Compromised Account Detection
+// Plataforma: Microsoft Sentinel
+// MITRE ATT&CK: T1078 — Valid Accounts
+// Autor: Lourrane Xavier
+// ============================================
+
+// LÓGICA: Detectar login BEM-SUCEDIDO de IP
+// que anteriormente gerou muitas falhas.
+// Isso indica conta comprometida após spray.
+
+let IPsSuspeitos = SigninLogs
+    | where TimeGenerated > ago(2h)
+    | where ResultType != 0
+    | summarize Falhas = count() by IPAddress
+    | where Falhas > 15
+    | project IPAddress;
+SigninLogs
+| where TimeGenerated > ago(2h)
+| where ResultType == 0
+| where IPAddress in (IPsSuspeitos)
+| project
+    TimeGenerated,
+    UserPrincipalName,
+    IPAddress,
+    Location,
+    AppDisplayName
+| order by TimeGenerated desc
+
+// ============================================
+// COMO INTERPRETAR OS RESULTADOS:
+// Qualquer resultado aqui = conta comprometida
+// O IP já estava na lista de suspeitos (falhas)
+// e agora conseguiu logar com sucesso.
+// Ação imediata: resetar senha + forçar MFA
+// ============================================
