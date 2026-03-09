@@ -1,0 +1,92 @@
+{
+  "incident": "INC-2026-001",
+  "title": "Password Spray Attack — Azure AD",
+  "date": "2026-03-09",
+  "analyst": "Lourrane Xavier",
+  "severity": "CRITICAL",
+  "iocs": {
+    "ip_addresses": [
+      {
+        "value": "45.33.32.156",
+        "type": "IPv4",
+        "role": "Origem do ataque",
+        "country": "Romania",
+        "asn": "AS63949 — Linode LLC",
+        "abuseipdb_score": 100,
+        "virustotal": "Malicioso — 12/94 engines",
+        "first_seen": "2026-03-09T14:32:00Z",
+        "last_seen": "2026-03-09T14:44:00Z",
+        "action_taken": "Bloqueado via Conditional Access Policy"
+      },
+      {
+        "value": "91.108.4.0/22",
+        "type": "IPv4 Range",
+        "role": "ASN suspeito associado",
+        "country": "Romania",
+        "asn": "AS59930",
+        "abuseipdb_score": 87,
+        "virustotal": "Suspeito — 4/94 engines",
+        "first_seen": "2026-03-09T14:35:00Z",
+        "last_seen": "2026-03-09T14:43:00Z",
+        "action_taken": "Bloqueado via Conditional Access Policy"
+      }
+    ],
+    "accounts_compromised": [
+      {
+        "type": "UserPrincipalName",
+        "value": "user1@empresa.com",
+        "status": "Comprometida",
+        "login_time": "2026-03-09T14:45:00Z",
+        "login_ip": "45.33.32.156",
+        "action_taken": "Senha resetada + MFA forçado + sessao encerrada"
+      },
+      {
+        "type": "UserPrincipalName",
+        "value": "user2@empresa.com",
+        "status": "Comprometida",
+        "login_time": "2026-03-09T14:46:00Z",
+        "login_ip": "45.33.32.156",
+        "action_taken": "Senha resetada + MFA forçado + sessao encerrada"
+      },
+      {
+        "type": "UserPrincipalName",
+        "value": "user3@empresa.com",
+        "status": "Comprometida",
+        "login_time": "2026-03-09T14:46:30Z",
+        "login_ip": "45.33.32.156",
+        "action_taken": "Senha resetada + MFA forçado + sessao encerrada"
+      }
+    ],
+    "indicators": [
+      {
+        "type": "Comportamento",
+        "value": "847 falhas de login em 12 minutos",
+        "significance": "Volume anomalo — ataque automatizado confirmado"
+      },
+      {
+        "type": "Geolocalizacao",
+        "value": "Romania — nunca visto nos logs anteriores",
+        "significance": "Pais de origem nao habitual para a empresa"
+      },
+      {
+        "type": "Horario",
+        "value": "14:32 UTC — fora do horario comercial",
+        "significance": "Atividade suspeita fora do padrao dos usuarios"
+      },
+      {
+        "type": "Padrao",
+        "value": "1 IP → 847 tentativas → N usuarios diferentes",
+        "significance": "Assinatura classica de Password Spray vs Brute Force"
+      }
+    ],
+    "containment_summary": {
+      "ips_blocked": 2,
+      "accounts_reset": 3,
+      "mfa_enforced": 3,
+      "sessions_terminated": 3,
+      "data_exfiltrated": false,
+      "time_to_detect_minutes": 12,
+      "time_to_contain_minutes": 23
+    }
+  }
+}
