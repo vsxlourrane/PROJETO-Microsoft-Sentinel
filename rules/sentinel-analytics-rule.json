@@ -1,0 +1,72 @@
+{
+  "name": "Password Spray Detection — Azure AD",
+  "version": "1.0.0",
+  "author": "Lourrane Xavier",
+  "date": "2026-03-09",
+  "platform": "Microsoft Sentinel",
+  "severity": "High",
+  "status": "Active",
+  "description": "Detecta ataques de Password Spray contra contas do Azure AD. Alerta quando um único IP gera mais de 20 falhas de login contra 5 ou mais usuários distintos em uma janela de 5 minutos.",
+  "mitre": {
+    "tactics": [
+      "CredentialAccess",
+      "InitialAccess"
+    ],
+    "techniques": [
+      {
+        "id": "T1110.003",
+        "name": "Password Spraying"
+      },
+      {
+        "id": "T1078",
+        "name": "Valid Accounts"
+      }
+    ]
+  },
+  "query": {
+    "language": "KQL",
+    "timeWindow": "PT5M",
+    "body": "SigninLogs | where TimeGenerated > ago(1h) | where ResultType != 0 | summarize TotalFalhas = count(), UsuariosAfetados = dcount(UserPrincipalName), PrimeiroEvento = min(TimeGenerated), UltimoEvento = max(TimeGenerated), ListaUsuarios = make_set(UserPrincipalName, 5) by IPAddress | where TotalFalhas > 20 and UsuariosAfetados > 5 | extend RiscoNivel = case(TotalFalhas > 500, 'CRITICO', TotalFalhas > 100, 'ALTO', TotalFalhas > 20, 'MEDIO', 'BAIXO') | sort by TotalFalhas desc"
+  },
+  "triggerOperator": "GreaterThan",
+  "triggerThreshold": 0,
+  "alertConfiguration": {
+    "threshold": {
+      "failedLogins": 20,
+      "distinctUsers": 5,
+      "timeWindowMinutes": 5
+    },
+    "severity": {
+      "critical": 500,
+      "high": 100,
+      "medium": 20
+    }
+  },
+  "responseActions": [
+    {
+      "step": 1,
+      "action": "Bloquear IP via Conditional Access Policy",
+      "priority": "Imediata"
+    },
+    {
+      "step": 2,
+      "action": "Resetar senha das contas afetadas",
+      "priority": "Imediata"
+    },
+    {
+      "step": 3,
+      "action": "Forcar habilitacao de MFA",
+      "priority": "Imediata"
+    },
+    {
+      "step": 4,
+      "action": "Encerrar sessoes ativas das contas comprometidas",
+      "priority": "Alta"
+    },
+    {
+      "step": 5,
+      "action": "Documentar IOCs no Incident Report",
+      "priority": "Alta"
+    }
+  ]
+}
