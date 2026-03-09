@@ -1,0 +1,96 @@
+{
+  "project": "SOC Project 01 — Password Spray Detection",
+  "platform": "Microsoft Sentinel",
+  "author": "Lourrane Xavier",
+  "date": "2026-03-09",
+  "attack_mapping": {
+    "tactics": [
+      {
+        "id": "TA0001",
+        "name": "Initial Access",
+        "techniques": [
+          {
+            "id": "T1078",
+            "name": "Valid Accounts",
+            "description": "Atacante usou credenciais legitimas comprometidas para acessar o ambiente",
+            "evidence": "Login bem-sucedido de IP previamente suspeito apos spray",
+            "detection": "Query KQL: login sucedido de IP com historico de falhas",
+            "mitigation": "MFA obrigatorio + Conditional Access Policy"
+          }
+        ]
+      },
+      {
+        "id": "TA0006",
+        "name": "Credential Access",
+        "techniques": [
+          {
+            "id": "T1110.003",
+            "name": "Password Spraying",
+            "description": "847 tentativas de login com senhas comuns contra multiplos usuarios",
+            "evidence": "847 Event ID 4625 em 12 minutos de 1 unico IP",
+            "detection": "Query KQL: summarize falhas por IP onde total > 20 e usuarios > 5",
+            "mitigation": "Bloqueio apos 10 tentativas + politica de senha forte"
+          }
+        ]
+      },
+      {
+        "id": "TA0003",
+        "name": "Persistence",
+        "techniques": [
+          {
+            "id": "T1556",
+            "name": "Modify Authentication Process",
+            "sub_technique": "T1556.006 — MFA Manipulation",
+            "description": "Tentativa de bypass do segundo fator de autenticacao",
+            "evidence": "Login bem-sucedido sem registro de MFA nos logs",
+            "detection": "Monitorar logins sem MFA em contas com MFA habilitado",
+            "mitigation": "Forcar MFA para todos os usuarios sem excecao"
+          }
+        ]
+      }
+    ],
+    "kill_chain": [
+      {
+        "phase": "1 — Reconnaissance",
+        "description": "Atacante coletou lista de emails corporativos publicos"
+      },
+      {
+        "phase": "2 — Weaponization",
+        "description": "Preparou lista de senhas comuns para spray"
+      },
+      {
+        "phase": "3 — Delivery",
+        "description": "Iniciou spray automatizado contra Azure AD"
+      },
+      {
+        "phase": "4 — Exploitation",
+        "description": "847 tentativas de login em 12 minutos"
+      },
+      {
+        "phase": "5 — Installation",
+        "description": "3 logins bem-sucedidos — contas comprometidas"
+      },
+      {
+        "phase": "6 — Command & Control",
+        "description": "Acesso ao ambiente corporativo via conta legitima"
+      },
+      {
+        "phase": "7 — Actions on Objectives",
+        "description": "Contido antes de exfiltracao — nenhum dado comprometido"
+      }
+    ]
+  }
+}
+```
+
+**4.** Clica em **"Commit changes"** e confirma
+
+---
+
+## ▶️ Arquivo 3 — IOCs do Incidente
+
+**1.** Clica em **"Add file"** → **"Create new file"**
+
+**2.** No campo do nome digita:
+```
+docs/iocs.json
